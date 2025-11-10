@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Презентация - Оффлайн Розница</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+            overflow: hidden;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+            padding: 40px 50px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: block;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .slide.prev {
+            display: block;
+            opacity: 0;
+            transform: translateX(-100%);
+        }
+
+        .slide-header {
+            text-align: center;
+            margin-bottom: 25px;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        .slide-title {
+            font-size: 44px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .slide-subtitle {
+            font-size: 18px;
+            color: #7f8c8d;
+            font-weight: 300;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 18px;
+            margin-top: 25px;
+            max-width: 100%;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 14px;
+            padding: 14px 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease-out backwards;
+            position: relative;
+            overflow: hidden;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+        }
+
+        .metric-card:nth-child(1) { animation-delay: 0.1s; }
+        .metric-card:nth-child(2) { animation-delay: 0.2s; }
+        .metric-card:nth-child(3) { animation-delay: 0.3s; }
+        .metric-card:nth-child(4) { animation-delay: 0.4s; }
+        .metric-card:nth-child(5) { animation-delay: 0.5s; }
+
+        .metric-name {
+            font-size: 10px;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            line-height: 1.2;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.1;
+        }
+
+        .metric-indicators {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+            flex: 1;
+        }
+
+        .indicator {
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-height: 50px;
+            overflow: hidden;
+        }
+
+        .indicator-label {
+            color: #95a5a6;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            font-weight: 500;
+            line-height: 1.1;
+        }
+
+        .indicator-value {
+            font-size: 11px;
+            font-weight: 700;
+            color: #34495e;
+            line-height: 1.3;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+
+        .indicator-value.positive {
+            color: #27ae60;
+        }
+
+        .indicator-value.negative {
+            color: #e74c3c;
+        }
+
+        .indicator-value.neutral {
+            color: #3498db;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            font-size: 20px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .nav-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 45px;
+            left: 40px;
+            background: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            font-size: 16px;
+            color: #667eea;
+            font-weight: 600;
+            z-index: 1000;
+        }
+
+        .store-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 28px 40px;
+            border-radius: 14px;
+            color: white;
+            margin-bottom: 25px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .store-name {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .store-subtitle {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+
+        .store-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .store-metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+
+        .store-metric-card:nth-child(1) { animation-delay: 0.1s; }
+        .store-metric-card:nth-child(2) { animation-delay: 0.15s; }
+        .store-metric-card:nth-child(3) { animation-delay: 0.2s; }
+        .store-metric-card:nth-child(4) { animation-delay: 0.25s; }
+        .store-metric-card:nth-child(5) { animation-delay: 0.3s; }
+        .store-metric-card:nth-child(6) { animation-delay: 0.35s; }
+        .store-metric-card:nth-child(7) { animation-delay: 0.4s; }
+        .store-metric-card:nth-child(8) { animation-delay: 0.45s; }
+
+        .store-metric-label {
+            font-size: 11px;
+            color: #95a5a6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .store-metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .store-metric-comparison {
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            flex-wrap: wrap;
+        }
+
+        .comparison-item {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .comparison-item.positive {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .comparison-item.negative {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .comparison-item.neutral {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .directions-section {
+            background: white;
+            border-radius: 14px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .directions-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .direction-item {
+            padding: 16px;
+            border: 1px solid #ecf0f1;
+            border-radius: 8px;
+            display: grid;
+            grid-template-columns: 2fr 1.2fr 1fr 1fr 1fr 0.8fr;
+            gap: 15px;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .direction-item:hover {
+            background: #f8f9fa;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .direction-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .direction-value {
+            font-size: 13px;
+            color: #34495e;
+        }
+
+        .direction-label {
+            font-size: 10px;
+            color: #95a5a6;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .value-large {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .value-small {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .actions-slide {
+            padding: 50px;
+        }
+
+        .actions-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 28px 40px;
+            border-radius: 14px;
+            color: white;
+            margin-bottom: 30px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .actions-title {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .actions-subtitle {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+
+        .action-card:nth-child(1) { animation-delay: 0.1s; }
+        .action-card:nth-child(2) { animation-delay: 0.2s; }
+        .action-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .action-store-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .action-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .action-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #f8f9fa;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .action-item:last-child {
+            border-bottom: none;
+        }
+
+        .action-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .action-text {
+            font-size: 15px;
+            color: #2c3e50;
+            line-height: 1.6;
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation" id="presentation"></div>
+    <div class="slide-counter" id="slideCounter">1 / 1</div>
+    <div class="navigation">
+        <button class="nav-btn" onclick="prevSlide()">←</button>
+        <button class="nav-btn" onclick="nextSlide()">→</button>
+    </div>
+
+    <script>
+        const data = {
+  "revenue_data": [
+    {"store": "Арбат", "direction": "Consumer", "prev_year": 8075318.0, "prev_month": 7467116.0, "current": 9063385.0, "y2y": 0.12, "m2m": 0.21, "plan": 31341074.0, "fact": 9063385.0, "forecast": 29874187.0, "percent": 0.95},
+    {"store": "Арбат", "direction": "Hi-Fi Audio", "prev_year": 5547797.0, "prev_month": 7396996.0, "current": 6137294.0, "y2y": 0.11, "m2m": -0.17, "plan": 30414623.0, "fact": 6137294.0, "forecast": 20229381.0, "percent": 0.67},
+    {"store": "Арбат", "direction": "Hi-Fi Portable", "prev_year": 2525302.0, "prev_month": 4759391.0, "current": 4789277.0, "y2y": 0.9, "m2m": 0.01, "plan": 20655904.0, "fact": 4789277.0, "forecast": 15786128.0, "percent": 0.76},
+    {"store": "Арбат", "direction": "Pro", "prev_year": 3517012.0, "prev_month": 3726479.0, "current": 5007258.0, "y2y": 0.42, "m2m": 0.34, "plan": 15474091.0, "fact": 5007258.0, "forecast": 16504626.0, "percent": 1.07},
+    {"store": "Арбат", "direction": "Музыка", "prev_year": 2717134.0, "prev_month": 2793618.0, "current": 4593914.0, "y2y": 0.69, "m2m": 0.64, "plan": 13469203.0, "fact": 4593914.0, "forecast": 15142186.0, "percent": 1.12},
+    {"store": "Арбат", "direction": "CustomShop", "prev_year": 1541620.0, "prev_month": 1076659.0, "current": 572214.0, "y2y": -0.63, "m2m": -0.47, "plan": 5218658.0, "fact": 572214.0, "forecast": 1886098.0, "percent": 0.36},
+    {"store": "Арбат", "direction": "Consumer аксессуары", "prev_year": 130388.0, "prev_month": 212338.0, "current": 217116.0, "y2y": 0.67, "m2m": 0.02, "plan": 1216419.0, "fact": 217116.0, "forecast": 715644.0, "percent": 0.59},
+    {"store": "Арбат", "direction": "Гейминг Аудио", "prev_year": 97599.0, "prev_month": 178564.0, "current": 254120.0, "y2y": 1.6, "m2m": 0.42, "plan": 910029.0, "fact": 254120.0, "forecast": 837616.0, "percent": 0.92},
+    {"store": "Арбат", "direction": "Прочее", "prev_year": 21981.0, "prev_month": 202839.0, "current": 52736.0, "y2y": 1.4, "m2m": -0.74, "plan": 0.0, "fact": 52736.0, "forecast": null, "percent": null},
+    {"store": "Арбат", "direction": "TOTAL", "prev_year": 24174149.0, "prev_month": 27814001.0, "current": 30687314.0, "y2y": 0.27, "m2m": 0.1, "plan": 118700000.0, "fact": 30687314.0, "forecast": 101149691.0, "percent": 0.85},
+    {"store": "Литейный", "direction": "Consumer", "prev_year": 4401610.0, "prev_month": 4013367.0, "current": 3865405.0, "y2y": -0.12, "m2m": -0.04, "plan": 15531669.0, "fact": 3865405.0, "forecast": 12834182.0, "percent": 0.83},
+    {"store": "Литейный", "direction": "Hi-Fi Audio", "prev_year": 2339012.0, "prev_month": 3651405.0, "current": 4339035.0, "y2y": 0.86, "m2m": 0.19, "plan": 10351093.0, "fact": 4339035.0, "forecast": 14406759.0, "percent": 1.39},
+    {"store": "Литейный", "direction": "Hi-Fi Portable", "prev_year": 1125730.0, "prev_month": 1251403.0, "current": 2200937.0, "y2y": 0.96, "m2m": 0.76, "plan": 7655537.0, "fact": 2200937.0, "forecast": 7307703.0, "percent": 0.95},
+    {"store": "Литейный", "direction": "Pro", "prev_year": 1212570.0, "prev_month": 1265020.0, "current": 1851575.0, "y2y": 0.53, "m2m": 0.46, "plan": 3780584.0, "fact": 1851575.0, "forecast": 6147725.0, "percent": 1.63},
+    {"store": "Литейный", "direction": "Музыка", "prev_year": 398982.0, "prev_month": 613369.0, "current": 689626.0, "y2y": 0.73, "m2m": 0.12, "plan": 2590551.0, "fact": 689626.0, "forecast": 2289742.0, "percent": 0.88},
+    {"store": "Литейный", "direction": "CustomShop", "prev_year": 94627.0, "prev_month": 210029.0, "current": 115677.0, "y2y": 0.22, "m2m": -0.45, "plan": 753857.0, "fact": 115677.0, "forecast": 384080.0, "percent": 0.51},
+    {"store": "Литейный", "direction": "Гейминг Аудио", "prev_year": 200727.0, "prev_month": 100946.0, "current": 47255.0, "y2y": -0.76, "m2m": -0.53, "plan": 476038.0, "fact": 47255.0, "forecast": 156899.0, "percent": 0.33},
+    {"store": "Литейный", "direction": "Consumer аксессуары", "prev_year": 41771.0, "prev_month": 57671.0, "current": 71971.0, "y2y": 0.72, "m2m": 0.25, "plan": 360672.0, "fact": 71971.0, "forecast": 238961.0, "percent": 0.66},
+    {"store": "Литейный", "direction": "Прочее", "prev_year": 140658.0, "prev_month": -11469.0, "current": 110367.0, "y2y": -0.22, "m2m": -10.62, "plan": 0.0, "fact": 110367.0, "forecast": null, "percent": null},
+    {"store": "Литейный", "direction": "TOTAL", "prev_year": 9955687.0, "prev_month": 11151741.0, "current": 13291846.0, "y2y": 0.34, "m2m": 0.19, "plan": 41500000.0, "fact": 13291846.0, "forecast": 44132497.0, "percent": 1.06},
+    {"store": "Хлебозавод", "direction": "Consumer", "prev_year": 2844396.0, "prev_month": 2053023.0, "current": 2243421.0, "y2y": -0.21, "m2m": 0.09, "plan": 7729280.0, "fact": 2243421.0, "forecast": 7252256.0, "percent": 0.94},
+    {"store": "Хлебозавод", "direction": "Hi-Fi Audio", "prev_year": 826614.0, "prev_month": 551076.0, "current": 1038116.0, "y2y": 0.26, "m2m": 0.88, "plan": 3327200.0, "fact": 1038116.0, "forecast": 3355895.0, "percent": 1.01},
+    {"store": "Хлебозавод", "direction": "Hi-Fi Portable", "prev_year": 408862.0, "prev_month": 841091.0, "current": 828369.0, "y2y": 1.03, "m2m": -0.02, "plan": 2982071.0, "fact": 828369.0, "forecast": 2677849.0, "percent": 0.9},
+    {"store": "Хлебозавод", "direction": "Pro", "prev_year": 608344.0, "prev_month": 478912.0, "current": 427083.0, "y2y": -0.3, "m2m": -0.11, "plan": 1846057.0, "fact": 427083.0, "forecast": 1380623.0, "percent": 0.75},
+    {"store": "Хлебозавод", "direction": "Музыка", "prev_year": 311115.0, "prev_month": 316536.0, "current": 684935.0, "y2y": 1.2, "m2m": 1.16, "plan": 1794017.0, "fact": 684935.0, "forecast": 2214174.0, "percent": 1.23},
+    {"store": "Хлебозавод", "direction": "Consumer аксессуары", "prev_year": 14710.0, "prev_month": 10140.0, "current": 38836.0, "y2y": 1.64, "m2m": 2.83, "plan": 119938.0, "fact": 38836.0, "forecast": 125544.0, "percent": 1.05},
+    {"store": "Хлебозавод", "direction": "CustomShop", "prev_year": 22907.0, "prev_month": 6106.0, "current": 21597.0, "y2y": -0.06, "m2m": 2.54, "plan": 107371.0, "fact": 21597.0, "forecast": 69815.0, "percent": 0.65},
+    {"store": "Хлебозавод", "direction": "Гейминг Аудио", "prev_year": 16365.0, "prev_month": 0.0, "current": 2490.0, "y2y": -0.85, "m2m": null, "plan": 94066.0, "fact": 2490.0, "forecast": 8049.0, "percent": 0.09},
+    {"store": "Хлебозавод", "direction": "Прочее", "prev_year": 13766.0, "prev_month": 22491.0, "current": 0.0, "y2y": -1.0, "m2m": -1.0, "plan": 0.0, "fact": 0.0, "forecast": null, "percent": null},
+    {"store": "Хлебозавод", "direction": "TOTAL", "prev_year": 5067077.0, "prev_month": 4279376.0, "current": 5284847.0, "y2y": 0.04, "m2m": 0.23, "plan": 18000000.0, "fact": 5284847.0, "forecast": 17084205.0, "percent": 0.95}
+  ],
+  "metrics_data": [
+    {"store": "Всего (Офлайн)", "traffic_2023": 11391.0, "traffic_fact": 14408.0, "traffic_y2y": 0.26, "traffic_plan": 43953.0, "traffic_percent": 1.08, "traffic_forecast": null, "conversion_2023": 0.1577, "conversion_plan": 0.175, "conversion_fact": 0.163, "conversion_percent": 0.93, "conversion_forecast": null, "avg_check_2023": 24128.0, "avg_check_plan": 23167.0, "avg_check_fact": 21181.0, "avg_check_percent": 0.91, "avg_check_forecast": null, "upt_2023": 1.64, "upt_plan": 1.62, "upt_fact": 1.52, "upt_percent": 0.939, "upt_forecast": null, "cb_2023": 6522809.0, "cb_plan": 34556020.0, "cb_fact": 9524158.0, "cb_percent": 0.91, "cb_forecast": null},
+    {"store": "Арбат", "traffic_2023": 6632.0, "traffic_fact": 7453.0, "traffic_y2y": 0.12, "traffic_plan": 23575.0, "traffic_percent": 1.04, "conversion_2023": 0.1639, "conversion_plan": 0.19, "conversion_fact": 0.185, "conversion_percent": 0.97, "avg_check_2023": 25879.0, "avg_check_plan": 26500.0, "avg_check_fact": 22446.0, "avg_check_percent": 0.85, "upt_2023": 1.82, "upt_plan": 1.82, "upt_fact": 1.63, "upt_percent": 0.899, "cb_2023": 3868713.0, "cb_plan": 23717078.0, "cb_fact": 5699387.0, "cb_percent": 0.79},
+    {"store": "Литейный", "traffic_2023": 2655.0, "traffic_fact": 4189.0, "traffic_y2y": 0.58, "traffic_plan": 11807.0, "traffic_percent": 1.18, "conversion_2023": 0.1722, "conversion_plan": 0.185, "conversion_fact": 0.158, "conversion_percent": 0.85, "avg_check_2023": 22531.0, "avg_check_plan": 19000.0, "avg_check_fact": 20328.0, "avg_check_percent": 1.07, "upt_2023": 1.35, "upt_plan": 1.36, "upt_fact": 1.39, "upt_percent": 1.021, "cb_2023": 1951119.0, "cb_plan": 8431877.0, "cb_fact": 2838396.0, "cb_percent": 1.12},
+    {"store": "Хлебозавод", "traffic_2023": 2104.0, "traffic_fact": 2766.0, "traffic_y2y": 0.31, "traffic_plan": 8571.0, "traffic_percent": 1.04, "conversion_2023": 0.1185, "conversion_plan": 0.12, "conversion_fact": 0.1114, "conversion_percent": 0.93, "avg_check_2023": 19285.0, "avg_check_plan": 17500.0, "avg_check_fact": 17352.0, "avg_check_percent": 0.99, "upt_2023": 1.37, "upt_plan": 1.35, "upt_fact": 1.33, "upt_percent": 0.989, "cb_2023": 702977.0, "cb_plan": 2407064.0, "cb_fact": 986375.0, "cb_percent": 1.32}
+  ]
+};
+
+        let currentSlide = 0;
+
+        function formatNumber(num, decimals = 0) {
+            if (num === null || num === undefined) return 'N/A';
+            return num.toLocaleString('ru-RU', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
+        }
+
+        function formatMoney(num) {
+            if (num === null || num === undefined) return 'N/A';
+            const formatted = Math.round(num).toLocaleString('ru-RU');
+            return formatted + ' ₽';
+        }
+
+        function formatPercent(num, showSign = true) {
+            if (num === null || num === undefined) return 'N/A';
+            const sign = (showSign && num > 0) ? '+' : '';
+            return sign + (num * 100).toFixed(1) + '%';
+        }
+
+        function getIndicatorClass(value) {
+            if (value === null || value === undefined) return 'neutral';
+            return value >= 0 ? 'positive' : 'negative';
+        }
+
+        function calculateAggregate(data, field) {
+            const totals = data.filter(d => d.direction === 'TOTAL');
+            if (totals.length === 0) return null;
+            return totals.reduce((acc, item) => acc + (item[field] || 0), 0);
+        }
+
+        function calculateAverage(data, field) {
+            const validValues = data.filter(d => d[field] !== null && d[field] !== undefined);
+            if (validValues.length === 0) return null;
+            const sum = validValues.reduce((acc, item) => acc + item[field], 0);
+            return sum / validValues.length;
+        }
+
+        function generateSlides() {
+            const presentation = document.getElementById('presentation');
+            presentation.innerHTML = '';
+
+            generateSummarySlide();
+
+            const stores = [...new Set(data.revenue_data
+                .filter(d => d.direction === 'TOTAL')
+                .map(d => d.store))];
+
+            stores.forEach(store => generateStoreSlide(store));
+
+            generateActionsSlide();
+
+            const slides = document.querySelectorAll('.slide');
+            if (slides.length > 0) {
+                slides[0].classList.add('active');
+            }
+
+            updateSlideCounter();
+        }
+
+        function generateSummarySlide() {
+            const presentation = document.getElementById('presentation');
+
+            // Используем агрегированные данные из файлов
+            const totalRevenueFact = calculateAggregate(data.revenue_data, 'fact');
+            const totalRevenuePlan = calculateAggregate(data.revenue_data, 'plan');
+            const totalRevenuePrevYear = calculateAggregate(data.revenue_data, 'prev_year');
+            const totalRevenuePrevMonth = calculateAggregate(data.revenue_data, 'prev_month');
+            const totalRevenueForecast = calculateAggregate(data.revenue_data, 'forecast');
+
+            // Рассчитываем YoY и MoM от агрегированных сумм
+            const avgY2Y = totalRevenuePrevYear ? (totalRevenueFact - totalRevenuePrevYear) / totalRevenuePrevYear : null;
+            const avgM2M = totalRevenuePrevMonth ? (totalRevenueFact - totalRevenuePrevMonth) / totalRevenuePrevMonth : null;
+
+            // Используем строку "Всего (Офлайн)" из metrics_data
+            const totalMetrics = data.metrics_data.find(m => m.store === 'Всего (Офлайн)') || data.metrics_data[0];
+
+            const totalTrafficFact = totalMetrics.traffic_fact;
+            const totalTrafficPlan = totalMetrics.traffic_plan;
+            const totalTrafficPrevYear = totalMetrics.traffic_2023;
+            const trafficY2Y = totalMetrics.traffic_y2y;
+
+            const avgConversionFact = totalMetrics.conversion_fact;
+            const avgConversionPlan = totalMetrics.conversion_plan;
+            const avgConversionPrevYear = totalMetrics.conversion_2023;
+
+            const avgCheckFact = totalMetrics.avg_check_fact;
+            const avgCheckPlan = totalMetrics.avg_check_plan;
+            const avgCheckPrevYear = totalMetrics.avg_check_2023;
+
+            const totalCBFact = totalMetrics.cb_fact;
+            const totalCBPlan = totalMetrics.cb_plan;
+            const totalCBPrevYear = totalMetrics.cb_2023;
+
+            const revenueVsPlan = totalRevenuePlan ? ((totalRevenueFact - totalRevenuePlan) / totalRevenuePlan) : null;
+            const revenueVsPlanRub = totalRevenueFact - totalRevenuePlan;
+
+            const trafficVsPlan = totalTrafficPlan ? ((totalTrafficFact - totalTrafficPlan) / totalTrafficPlan) : null;
+            const trafficVsPlanAbs = totalTrafficFact - totalTrafficPlan;
+
+            const conversionVsPlan = avgConversionPlan ? ((avgConversionFact - avgConversionPlan) / avgConversionPlan) : null;
+            const conversionVsPlanAbs = avgConversionFact - avgConversionPlan;
+
+            const checkVsPlan = avgCheckPlan ? ((avgCheckFact - avgCheckPlan) / avgCheckPlan) : null;
+            const checkVsPlanRub = avgCheckFact - avgCheckPlan;
+
+            const cbVsPlan = totalCBPlan ? ((totalCBFact - totalCBPlan) / totalCBPlan) : null;
+            const cbVsPlanRub = totalCBFact - totalCBPlan;
+
+            const revenueY2YRub = totalRevenueFact - totalRevenuePrevYear;
+            const revenueM2MRub = totalRevenueFact - totalRevenuePrevMonth;
+            const trafficY2YAbs = totalTrafficFact - totalTrafficPrevYear;
+            const conversionY2Y = avgConversionPrevYear ? ((avgConversionFact - avgConversionPrevYear) / avgConversionPrevYear) : null;
+            const conversionM2M = conversionVsPlan;
+            const checkY2Y = avgCheckPrevYear ? ((avgCheckFact - avgCheckPrevYear) / avgCheckPrevYear) : null;
+            const checkM2M = checkVsPlan;
+            const cbY2Y = totalCBPrevYear ? ((totalCBFact - totalCBPrevYear) / totalCBPrevYear) : null;
+            const cbM2M = cbVsPlan;
+
+            // %Прогноз = Прогноз / План
+            const revenuePercentForecast = totalRevenuePlan ? (totalRevenueForecast / totalRevenuePlan) : null;
+            const trafficPercentForecast = totalMetrics.traffic_percent;
+            const conversionPercentForecast = totalMetrics.conversion_percent;
+            const checkPercentForecast = totalMetrics.avg_check_percent;
+            const cbPercentForecast = totalMetrics.cb_percent;
+
+            const slide = document.createElement('div');
+            slide.className = 'slide';
+            slide.innerHTML = `
+                <div class="slide-header">
+                    <h1 class="slide-title">Оффлайн Розница</h1>
+                    <p class="slide-subtitle">Сводные показатели по всем магазинам</p>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-name">Выручка</div>
+                        <div class="metric-value">${formatMoney(totalRevenueFact)}</div>
+                        <div class="metric-indicators">
+                            <div class="indicator">
+                                <div class="indicator-label">Год к году %</div>
+                                <div class="indicator-value ${getIndicatorClass(avgY2Y)}">${formatPercent(avgY2Y)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">Год к году ₽</div>
+                                <div class="indicator-value ${getIndicatorClass(revenueY2YRub)}">${formatMoney(revenueY2YRub)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">Месяц к месяцу %</div>
+                                <div class="indicator-value ${getIndicatorClass(avgM2M)}">${formatPercent(avgM2M)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">Месяц к месяцу ₽</div>
+                                <div class="indicator-value ${getIndicatorClass(revenueM2MRub)}">${formatMoney(revenueM2MRub)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">К плану %</div>
+                                <div class="indicator-value ${getIndicatorClass(revenueVsPlan)}">${formatPercent(revenueVsPlan)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">К плану ₽</div>
+                                <div class="indicator-value ${getIndicatorClass(revenueVsPlanRub)}">${formatMoney(revenueVsPlanRub)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">% Прогноз</div>
+                                <div class="indicator-value ${getIndicatorClass(revenuePercentForecast - 1)}">${formatPercent(revenuePercentForecast - 1)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">Факт</div>
+                                <div class="indicator-value neutral">${formatMoney(totalRevenueFact)}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-name">Трафик</div>
+                        <div class="metric-value">${formatNumber(totalTrafficFact)}</div>
+                        <div class="metric-indicators">
+                            <div class="indicator">
+                                <div class="indicator-label">Год к году %</div>
+                                <div class="indicator-value ${getIndicatorClass(trafficY2Y)}">${formatPercent(trafficY2Y)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">Год к году</div>
+                                <div class="indicator-value ${getIndicatorClass(trafficY2YAbs)}">${formatNumber(trafficY2YAbs)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">К плану %</div>
+                                <div class="indicator-value ${getIndicatorClass(trafficVsPlan)}">${formatPercent(trafficVsPlan)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">К плану</div>
+                                <div class="indicator-value ${getIndicatorClass(trafficVsPlanAbs)}">${formatNumber(trafficVsPlanAbs)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">% Прогноз</div>
+                                <div class="indicator-value ${getIndicatorClass(trafficPercentForecast - 1)}">${formatPercent(trafficPercentForecast - 1)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">Факт</div>
+                                <div class="indicator-value neutral">${formatNumber(totalTrafficFact)}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-name">Конверсия</div>
+                        <div class="metric-value">${formatPercent(avgConversionFact, false)}</div>
+                        <div class="metric-indicators">
+                            <div class="indicator">
+                                <div class="indicator-label">Год к году %</div>
+                                <div class="indicator-value ${getIndicatorClass(conversionY2Y)}">${formatPercent(conversionY2Y)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">Год к году</div>
+                                <div class="indicator-value ${getIndicatorClass(conversionY2Y)}">${formatPercent(avgConversionFact - avgConversionPrevYear, false)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">К плану %</div>
+                                <div class="indicator-value ${getIndicatorClass(conversionVsPlan)}">${formatPercent(conversionVsPlan)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">К плану</div>
+                                <div class="indicator-value ${getIndicatorClass(conversionVsPlanAbs)}">${formatPercent(conversionVsPlanAbs, false)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">% Прогноз</div>
+                                <div class="indicator-value ${getIndicatorClass(conversionPercentForecast - 1)}">${formatPercent(conversionPercentForecast - 1)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">Факт</div>
+                                <div class="indicator-value neutral">${formatPercent(avgConversionFact, false)}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-name">Средний чек</div>
+                        <div class="metric-value">${formatMoney(avgCheckFact)}</div>
+                        <div class="metric-indicators">
+                            <div class="indicator">
+                                <div class="indicator-label">Год к году %</div>
+                                <div class="indicator-value ${getIndicatorClass(checkY2Y)}">${formatPercent(checkY2Y)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">Год к году ₽</div>
+                                <div class="indicator-value ${getIndicatorClass(checkY2Y)}">${formatMoney(avgCheckFact - avgCheckPrevYear)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">К плану %</div>
+                                <div class="indicator-value ${getIndicatorClass(checkVsPlan)}">${formatPercent(checkVsPlan)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">К плану ₽</div>
+                                <div class="indicator-value ${getIndicatorClass(checkVsPlanRub)}">${formatMoney(checkVsPlanRub)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">% Прогноз</div>
+                                <div class="indicator-value ${getIndicatorClass(checkPercentForecast - 1)}">${formatPercent(checkPercentForecast - 1)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">Факт</div>
+                                <div class="indicator-value neutral">${formatMoney(avgCheckFact)}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-name">СБ</div>
+                        <div class="metric-value">${formatMoney(totalCBFact)}</div>
+                        <div class="metric-indicators">
+                            <div class="indicator">
+                                <div class="indicator-label">Год к году %</div>
+                                <div class="indicator-value ${getIndicatorClass(cbY2Y)}">${formatPercent(cbY2Y)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">Год к году ₽</div>
+                                <div class="indicator-value ${getIndicatorClass(cbY2Y)}">${formatMoney(totalCBFact - totalCBPrevYear)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">К плану %</div>
+                                <div class="indicator-value ${getIndicatorClass(cbVsPlan)}">${formatPercent(cbVsPlan)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">К плану ₽</div>
+                                <div class="indicator-value ${getIndicatorClass(cbVsPlanRub)}">${formatMoney(cbVsPlanRub)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">% Прогноз</div>
+                                <div class="indicator-value ${getIndicatorClass(cbPercentForecast - 1)}">${formatPercent(cbPercentForecast - 1)}</div>
+                            </div>
+                            <div class="indicator">
+                                <div class="indicator-label">Факт</div>
+                                <div class="indicator-value neutral">${formatMoney(totalCBFact)}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            presentation.appendChild(slide);
+        }
+
+        function generateStoreSlide(storeName) {
+            const presentation = document.getElementById('presentation');
+
+            const storeRevenue = data.revenue_data.filter(d => d.store === storeName);
+            const storeTotal = storeRevenue.find(d => d.direction === 'TOTAL');
+            const storeDirections = storeRevenue.filter(d => d.direction !== 'TOTAL');
+
+            const storeMetrics = data.metrics_data.find(m => m.store === storeName) || {};
+
+            const slide = document.createElement('div');
+            slide.className = 'slide';
+
+            const revenueVsPlanPct = storeTotal?.plan ? ((storeTotal.fact - storeTotal.plan) / storeTotal.plan) : null;
+            const revenueVsPlanRub = storeTotal ? (storeTotal.fact - storeTotal.plan) : null;
+            const revenueY2YRub = storeTotal ? (storeTotal.fact - storeTotal.prev_year) : null;
+            const revenueM2MRub = storeTotal ? (storeTotal.fact - storeTotal.prev_month) : null;
+
+            const trafficVsPlan = storeMetrics.traffic_plan ? ((storeMetrics.traffic_fact - storeMetrics.traffic_plan) / storeMetrics.traffic_plan) : null;
+            const trafficY2YAbs = storeMetrics.traffic_fact - storeMetrics.traffic_2023;
+
+            const convVsPlan = storeMetrics.conversion_plan ? ((storeMetrics.conversion_fact - storeMetrics.conversion_plan) / storeMetrics.conversion_plan) : null;
+            const convY2Y = storeMetrics.conversion_2023 ? ((storeMetrics.conversion_fact - storeMetrics.conversion_2023) / storeMetrics.conversion_2023) : null;
+
+            const checkVsPlan = storeMetrics.avg_check_plan ? ((storeMetrics.avg_check_fact - storeMetrics.avg_check_plan) / storeMetrics.avg_check_plan) : null;
+            const checkVsPlanRub = storeMetrics.avg_check_fact - storeMetrics.avg_check_plan;
+            const checkY2Y = storeMetrics.avg_check_2023 ? ((storeMetrics.avg_check_fact - storeMetrics.avg_check_2023) / storeMetrics.avg_check_2023) : null;
+            const checkY2YRub = storeMetrics.avg_check_fact - storeMetrics.avg_check_2023;
+
+            const cbVsPlan = storeMetrics.cb_plan ? ((storeMetrics.cb_fact - storeMetrics.cb_plan) / storeMetrics.cb_plan) : null;
+            const cbVsPlanRub = storeMetrics.cb_fact - storeMetrics.cb_plan;
+            const cbY2Y = storeMetrics.cb_2023 ? ((storeMetrics.cb_fact - storeMetrics.cb_2023) / storeMetrics.cb_2023) : null;
+            const cbY2YRub = storeMetrics.cb_fact - storeMetrics.cb_2023;
+
+            let directionsHTML = storeDirections.map(dir => `
+                <div class="direction-item">
+                    <div>
+                        <div class="direction-name">${dir.direction}</div>
+                    </div>
+                    <div>
+                        <div class="direction-label">Выручка</div>
+                        <div class="direction-value value-large">${formatMoney(dir.fact)}</div>
+                    </div>
+                    <div>
+                        <div class="direction-label">YoY</div>
+                        <div class="direction-value" style="color: ${dir.y2y >= 0 ? '#27ae60' : '#e74c3c'};">
+                            ${formatPercent(dir.y2y)}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="direction-label">MoM</div>
+                        <div class="direction-value" style="color: ${dir.m2m >= 0 ? '#27ae60' : '#e74c3c'};">
+                            ${formatPercent(dir.m2m)}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="direction-label">К плану</div>
+                        <div class="direction-value" style="color: ${dir.percent >= 1 ? '#27ae60' : '#e74c3c'};">
+                            ${formatPercent(dir.percent - 1)}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="direction-label">План</div>
+                        <div class="direction-value value-small">${formatMoney(dir.plan)}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            slide.innerHTML = `
+                <div class="store-header">
+                    <div class="store-name">${storeName}</div>
+                    <div class="store-subtitle">Детальная аналитика магазина</div>
+                </div>
+
+                <div class="store-metrics-grid">
+                    <div class="store-metric-card">
+                        <div class="store-metric-label">Выручка</div>
+                        <div class="store-metric-value">${formatMoney(storeTotal?.fact)}</div>
+                        <div class="store-metric-comparison">
+                            <span class="comparison-item ${getIndicatorClass(storeTotal?.y2y)}">YoY: ${formatPercent(storeTotal?.y2y)}</span>
+                            <span class="comparison-item ${getIndicatorClass(storeTotal?.m2m)}">MoM: ${formatPercent(storeTotal?.m2m)}</span>
+                            <span class="comparison-item ${getIndicatorClass((storeTotal?.percent || 0) - 1)}">%Прогноз: ${formatPercent((storeTotal?.percent || 0) - 1)}</span>
+                            <span class="comparison-item neutral">План: ${formatMoney(storeTotal?.plan)}</span>
+                        </div>
+                    </div>
+
+                    <div class="store-metric-card">
+                        <div class="store-metric-label">Трафик</div>
+                        <div class="store-metric-value">${formatNumber(storeMetrics.traffic_fact)}</div>
+                        <div class="store-metric-comparison">
+                            <span class="comparison-item ${getIndicatorClass(storeMetrics.traffic_y2y)}">YoY: ${formatPercent(storeMetrics.traffic_y2y)}</span>
+                            <span class="comparison-item ${getIndicatorClass(storeMetrics.traffic_percent - 1)}">%Прогноз: ${formatPercent(storeMetrics.traffic_percent - 1)}</span>
+                            <span class="comparison-item neutral">План: ${formatNumber(storeMetrics.traffic_plan)}</span>
+                        </div>
+                    </div>
+
+                    <div class="store-metric-card">
+                        <div class="store-metric-label">Конверсия</div>
+                        <div class="store-metric-value">${formatPercent(storeMetrics.conversion_fact, false)}</div>
+                        <div class="store-metric-comparison">
+                            <span class="comparison-item ${getIndicatorClass(convY2Y)}">YoY: ${formatPercent(convY2Y)}</span>
+                            <span class="comparison-item ${getIndicatorClass(storeMetrics.conversion_percent - 1)}">%Прогноз: ${formatPercent(storeMetrics.conversion_percent - 1)}</span>
+                            <span class="comparison-item neutral">План: ${formatPercent(storeMetrics.conversion_plan, false)}</span>
+                        </div>
+                    </div>
+
+                    <div class="store-metric-card">
+                        <div class="store-metric-label">Средний чек</div>
+                        <div class="store-metric-value">${formatMoney(storeMetrics.avg_check_fact)}</div>
+                        <div class="store-metric-comparison">
+                            <span class="comparison-item ${getIndicatorClass(checkY2Y)}">YoY: ${formatPercent(checkY2Y)}</span>
+                            <span class="comparison-item ${getIndicatorClass(storeMetrics.avg_check_percent - 1)}">%Прогноз: ${formatPercent(storeMetrics.avg_check_percent - 1)}</span>
+                            <span class="comparison-item neutral">План: ${formatMoney(storeMetrics.avg_check_plan)}</span>
+                        </div>
+                    </div>
+
+                    <div class="store-metric-card">
+                        <div class="store-metric-label">UPT</div>
+                        <div class="store-metric-value">${formatNumber(storeMetrics.upt_fact, 2)}</div>
+                        <div class="store-metric-comparison">
+                            <span class="comparison-item ${getIndicatorClass(storeMetrics.upt_fact - storeMetrics.upt_plan)}">${formatNumber(storeMetrics.upt_fact - storeMetrics.upt_plan, 2)}</span>
+                            <span class="comparison-item ${getIndicatorClass(storeMetrics.upt_percent - 1)}">%Прогноз: ${formatPercent(storeMetrics.upt_percent - 1)}</span>
+                            <span class="comparison-item neutral">План: ${formatNumber(storeMetrics.upt_plan, 2)}</span>
+                        </div>
+                    </div>
+
+                    <div class="store-metric-card">
+                        <div class="store-metric-label">СБ</div>
+                        <div class="store-metric-value">${formatMoney(storeMetrics.cb_fact)}</div>
+                        <div class="store-metric-comparison">
+                            <span class="comparison-item ${getIndicatorClass(cbY2Y)}">YoY: ${formatPercent(cbY2Y)}</span>
+                            <span class="comparison-item ${getIndicatorClass(storeMetrics.cb_percent - 1)}">%Прогноз: ${formatPercent(storeMetrics.cb_percent - 1)}</span>
+                            <span class="comparison-item neutral">План: ${formatMoney(storeMetrics.cb_plan)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="directions-section">
+                    <h3 class="section-title">Направления (Детализация по категориям)</h3>
+                    <div class="directions-grid">
+                        ${directionsHTML}
+                    </div>
+                </div>
+            `;
+
+            presentation.appendChild(slide);
+        }
+
+        function generateActionsSlide() {
+            const presentation = document.getElementById('presentation');
+            const slide = document.createElement('div');
+            slide.className = 'slide actions-slide';
+
+            const actionsData = {
+                'Арбат': [
+                    'Работа с контактами по HiFi-audio и Custom',
+                    'На пятиминутках взять в работу товары СБ',
+                    'ТимЛиды берут в работу Флоп продавца'
+                ],
+                'Литейный': [
+                    'В Portable и Personal вытащить все цвета на витрину',
+                    'Во всех топ категориях проанализировать достаточное количество товара и сделать заказ на недостающие',
+                    'Управляющий и зам берут флоп продавцов на персональное развитие'
+                ],
+                'Хлебозавод': [
+                    'Доделать зону Pro и насытить её товаром',
+                    'Доделать витрину в Personal',
+                    'Проанализировать Гейминг и завести Топ позиции'
+                ]
+            };
+
+            let actionsHTML = '';
+            Object.keys(actionsData).forEach(store => {
+                const actions = actionsData[store];
+                const actionsListHTML = actions.map((action, index) => `
+                    <li class="action-item">
+                        <div class="action-number">${index + 1}</div>
+                        <div class="action-text">${action}</div>
+                    </li>
+                `).join('');
+
+                actionsHTML += `
+                    <div class="action-card">
+                        <div class="action-store-name">${store}</div>
+                        <ul class="action-list">
+                            ${actionsListHTML}
+                        </ul>
+                    </div>
+                `;
+            });
+
+            slide.innerHTML = `
+                <div class="actions-header">
+                    <div class="actions-title">Действия по магазинам</div>
+                    <div class="actions-subtitle">План мероприятий для достижения целей</div>
+                </div>
+
+                <div class="actions-grid">
+                    ${actionsHTML}
+                </div>
+            `;
+
+            presentation.appendChild(slide);
+        }
+
+        function showSlide(index) {
+            const slides = document.querySelectorAll('.slide');
+
+            if (index < 0) {
+                currentSlide = slides.length - 1;
+            } else if (index >= slides.length) {
+                currentSlide = 0;
+            } else {
+                currentSlide = index;
+            }
+
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active', 'prev');
+                if (i === currentSlide) {
+                    slide.classList.add('active');
+                } else if (i < currentSlide) {
+                    slide.classList.add('prev');
+                }
+            });
+
+            updateSlideCounter();
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function updateSlideCounter() {
+            const slides = document.querySelectorAll('.slide');
+            const counter = document.getElementById('slideCounter');
+            counter.textContent = `${currentSlide + 1} / ${slides.length}`;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        generateSlides();
+    </script>
+</body>
+</html>
